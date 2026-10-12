@@ -1,0 +1,11 @@
+{
+  "name": "MacroFood - Consulta de Preços",
+  "short_name": "MacroFood Preços",
+  "description": "Cadastro de produtos e consulta de preços por código de barras.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f5f8",
+  "theme_color": "#351044",
+  "icons": []
+}

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#351044">
+  <title>MacroFood | Consulta de Preços</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">M</div>
+    <div><strong>MacroFood</strong><span>Cadastro e consulta de preços</span></div>
+    <span id="connection" class="connection">Verificando conexão…</span>
+  </header>
+  <main>
+    <nav class="tabs" aria-label="Navegação principal">
+      <button class="tab active" data-view="consult">Consultar preço</button>
+      <button class="tab" data-view="products">Produtos</button>
+      <button class="tab" data-view="backup">Backup / Importar</button>
+    </nav>
+
+    <section id="view-consult" class="view">
+      <div class="hero">
+        <div>
+          <p class="eyebrow">CONSULTA RÁPIDA</p>
+          <h1>Qual é o preço<br>desse produto?</h1>
+          <p class="muted">Leia o código de barras ou digite o código/nome do produto.</p>
+        </div>
+        <div class="hero-icon">▥</div>
+      </div>
+      <div class="scan-panel panel">
+        <button id="scanButton" class="button primary large">▦ &nbsp; Abrir câmera e ler código</button>
+        <video id="video" playsinline muted hidden></video>
+        <div id="scanStatus" class="scan-status" aria-live="polite">A câmera depende de permissão do navegador e, normalmente, de HTTPS ou localhost.</div>
+        <button id="stopScan" class="button secondary" hidden>Fechar câmera</button>
+        <div class="divider"><span>ou consulte manualmente</span></div>
+        <form id="lookupForm" class="lookup-row">
+          <input id="lookupInput" autocomplete="off" placeholder="Código, código de barras ou nome…" aria-label="Buscar produto">
+          <button class="button primary" type="submit">Buscar</button>
+        </form>
+      </div>
+      <div id="lookupResult" class="result-area">
+        <div class="empty-state"><div class="empty-icon">⌕</div><strong>Pronto para consultar</strong><p>O resultado do produto aparecerá aqui.</p></div>
+      </div>
+    </section>
+
+    <section id="view-products" class="view" hidden>
+      <div class="section-heading"><div><p class="eyebrow">SEU CATÁLOGO</p><h1>Produtos</h1><p class="muted">Os dados ficam salvos neste dispositivo.</p></div><button id="newProduct" class="button primary">+ Novo produto</button></div>
+      <div class="panel">
+        <form id="productForm">
+          <input type="hidden" id="editId">
+          <div class="form-grid">
+            <label>Código interno (até 6 dígitos)
+              <input id="productCode" inputmode="numeric" maxlength="6" placeholder="Ex.: 001245" required>
+            </label>
+            <label>Código de barras
+              <input id="barcode" inputmode="numeric" placeholder="EAN / GTIN">
+            </label>
+            <label class="wide">Nome do produto
+              <input id="productName" placeholder="Ex.: Leite condensado 395g" required>
+            </label>
+            <label>Valor de varejo (R$)
+              <input id="retailPrice" inputmode="decimal" placeholder="0,00" required>
+            </label>
+            <label>Valor de atacado (R$) — opcional
+              <input id="wholesalePrice" inputmode="decimal" placeholder="Deixe vazio se não houver">
+            </label>
+          </div>
+          <p id="formMessage" class="form-message" role="status"></p>
+          <div class="actions"><button class="button primary" type="submit">Salvar produto</button><button id="cancelEdit" class="button secondary" type="button" hidden>Cancelar edição</button></div>
+        </form>
+      </div>
+      <div class="list-toolbar"><input id="productSearch" placeholder="Filtrar produtos cadastrados…"><span id="productCount" class="muted"></span></div>
+      <div id="productList" class="product-list"></div>
+    </section>
+
+    <section id="view-backup" class="view" hidden>
+      <p class="eyebrow">SEUS DADOS</p><h1>Backup e transferência</h1>
+      <p class="muted">Use o backup para guardar uma cópia ou transferir o catálogo para outro aparelho.</p>
+      <div class="backup-grid">
+        <article class="panel"><div class="backup-icon">↓</div><h2>Exportar catálogo</h2><p>Baixe todos os produtos em um arquivo JSON de backup.</p><button id="exportButton" class="button primary">Exportar backup</button></article>
+        <article class="panel"><div class="backup-icon">↑</div><h2>Importar catálogo</h2><p>Carregue um backup JSON. Você poderá substituir ou mesclar os produtos.</p><input type="file" id="importFile" accept=".json,application/json"><div class="actions"><button id="mergeImport" class="button secondary">Mesclar produtos</button><button id="replaceImport" class="button danger">Substituir tudo</button></div></article>
+        <article class="panel"><div class="backup-icon">▤</div><h2>Importar CSV</h2><p>Importe uma planilha CSV com cabeçalhos: codigo,nome,codigo_barras,varejo,atacado. Valores decimais podem usar vírgula.</p><input type="file" id="csvFile" accept=".csv,text/csv"><button id="csvImport" class="button primary">Importar CSV</button></article>
+      </div>
+      <div class="notice"><strong>Importante sobre vários dispositivos</strong><p>Esta primeira versão funciona offline e guarda os dados localmente em cada aparelho. Para todos os aparelhos compartilharem automaticamente o mesmo catálogo pela internet, será necessário conectar um banco de dados online (por exemplo, Supabase). Até isso ser configurado, use exportar/importar para transferir os produtos.</p></div>
+      <p id="backupMessage" class="form-message" role="status"></p>
+    </section>
+  </main>
+  <footer>MacroFood · Consulta de preços <span>Versão inicial 1.0</span></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

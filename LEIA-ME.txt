@@ -1,0 +1,47 @@
+MACROFOOD — CADASTRO E CONSULTA DE PREÇOS
+Versão 1.1 — catálogo AutoChat importado
+
+O QUE JÁ FUNCIONA
+- Catálogo inicial importado do arquivo AutoChat_8.0.29/data/products.json: 508 produtos com código, nome, marca, preço de venda e preço de atacado quando preenchido.
+- Campo de marca no cadastro e edição.
+- Preços de varejo e atacado podem ser editados na aba Produtos: clique em Editar, altere os valores e salve.
+- O catálogo original não tinha campo de código de barras; os códigos de barras foram deixados vazios para preencher quando disponíveis.
+- Um produto do arquivo original não tinha código interno; ele foi preservado com o código vazio para você preencher ao editar.
+- Cadastro de código interno de 1 a 6 dígitos, código de barras, nome, varejo e atacado opcional.
+- Busca por código interno, código de barras ou nome.
+- Leitura de código de barras pela câmera em navegadores compatíveis.
+- Edição e exclusão de produtos.
+- Exportação/importação de backup JSON.
+- Importação de CSV.
+- Interface adaptada para celular e computador.
+- Cache do aplicativo para abrir offline após a primeira visita em ambiente compatível.
+
+IMPORTANTE: DADOS LOCAIS E SINCRONIZAÇÃO
+Esta versão guarda os produtos no armazenamento local do navegador de cada dispositivo. Isso permite uso offline, mas não sincroniza automaticamente celulares e computadores entre si. Para sincronizar, será necessário configurar um banco de dados online e autenticação (por exemplo, Supabase). Até essa integração ser feita, transfira o catálogo com Backup/Importar.
+
+COMO ABRIR NO COMPUTADOR
+1. Extraia o ZIP para uma pasta.
+2. Para teste simples, abra index.html. Cadastro e busca manual funcionam; a câmera e o modo offline instalável podem exigir servidor local.
+3. Para usar câmera e PWA com segurança, publique em um site HTTPS ou rode um servidor local. No Windows com Python instalado, abra o Prompt dentro da pasta e execute:
+   python -m http.server 8000
+   Depois abra http://localhost:8000
+   Para a câmera, use um navegador compatível e permita acesso.
+
+COMO USAR NO CELULAR
+1. Publique a pasta em um endereço HTTPS (hospedagem estática).
+2. Abra o endereço no Chrome/Edge/Safari compatível.
+3. Permita acesso à câmera ao tocar em “Abrir câmera e ler código”.
+4. Para instalação como app, use “Adicionar à tela inicial”/“Instalar aplicativo” quando o navegador oferecer.
+5. Abra uma vez com internet para carregar os arquivos; depois o app pode abrir offline. A disponibilidade da câmera offline depende do navegador e das permissões.
+
+IMPORTAR CSV
+Cabeçalhos aceitos incluem:
+codigo,nome,codigo_barras,varejo,atacado
+Também são aceitos nomes como código, produto, ean, valor_varejo, valor_atacado.
+Use uma linha por produto. Evite salvar códigos como números com notação científica. O código interno deve ter no máximo 6 dígitos.
+
+LIMITAÇÕES CONHECIDAS
+- O leitor usa BarcodeDetector, disponível principalmente em navegadores Chromium recentes; não é suportado em todos os navegadores. Se não aparecer suporte, use busca manual.
+- Abrir a câmera exige HTTPS ou localhost na maioria dos navegadores.
+- Não há login nem sincronização multiusuário nesta versão inicial.
+- Não use o app como única cópia dos seus preços: exporte backups regularmente.
