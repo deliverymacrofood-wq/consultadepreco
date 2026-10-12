@@ -45,3 +45,6 @@ LIMITAÇÕES CONHECIDAS
 - Abrir a câmera exige HTTPS ou localhost na maioria dos navegadores.
 - Não há login nem sincronização multiusuário nesta versão inicial.
 - Não use o app como única cópia dos seus preços: exporte backups regularmente.
+
+CATÁLOGO IMPORTADO
+O catálogo incluído foi extraído do PDF TODOS OS PRODUTOS(1).pdf: 487 produtos, com código reduzido, código de barras, nome, marca estimada a partir do nome e P.Venda. Nas páginas 24 a 49, P.Venda foi dividido por Qt. Unit., conforme a regra solicitada anteriormente. O PDF não apresenta um campo explícito de preço de atacado; P.Tabela coincide com P.Venda nos registros analisados, então o atacado fica vazio quando não há um valor diferente. Confirme os valores de atacado na fonte original se precisar preencher esses preços.

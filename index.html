@@ -58,6 +58,7 @@
             <label>Código de barras
               <input id="barcode" inputmode="numeric" placeholder="EAN / GTIN">
             </label>
+            <label>Marca (opcional)<input id="productBrand" placeholder="Ex.: Nestlé"></label>
             <label class="wide">Nome do produto
               <input id="productName" placeholder="Ex.: Leite condensado 395g" required>
             </label>
@@ -88,8 +89,9 @@
       <p id="backupMessage" class="form-message" role="status"></p>
     </section>
   </main>
-  <footer>MacroFood · Consulta de preços <span>Versão inicial 1.0</span></footer>
+  <footer>MacroFood · Consulta de preços <span>Versão 1.2 · Catálogo importado</span></footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="seed-products.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
