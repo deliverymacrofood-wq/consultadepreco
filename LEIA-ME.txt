@@ -1,5 +1,5 @@
 MACROFOOD — CADASTRO E CONSULTA DE PREÇOS
-Versão 1.3 — correção de leitura pela câmera
+Versão 1.4 — correção de carregamento do leitor alternativo
 
 O QUE JÁ FUNCIONA
 - Catálogo inicial importado do arquivo AutoChat_8.0.29/data/products.json: 508 produtos com código, nome, marca, preço de venda e preço de atacado quando preenchido.
@@ -49,3 +49,8 @@ LIMITAÇÕES CONHECIDAS
 CATÁLOGO IMPORTADO
 O catálogo incluído foi extraído do PDF TODOS OS PRODUTOS(1).pdf: 487 produtos, com código reduzido, código de barras, nome, marca estimada a partir do nome e P.Venda. Nas páginas 24 a 49, P.Venda foi dividido por Qt. Unit., conforme a regra solicitada anteriormente. O PDF não apresenta um campo explícito de preço de atacado; P.Tabela coincide com P.Venda nos registros analisados, então o atacado fica vazio quando não há um valor diferente. Confirme os valores de atacado na fonte original se precisar preencher esses preços.
 \n\nCORREÇÃO DA CÂMERA (v1.3)\n- O leitor agora usa uma alternativa quando o navegador não possui BarcodeDetector.\n- A câmera ainda exige HTTPS ou http://localhost; abrir index.html diretamente pode ser bloqueado por segurança.\n- No Windows, extraia o ZIP, abra o Prompt de Comando dentro da pasta MacroFood_Consulta_Precos e execute: python -m http.server 8000\n- Depois abra http://localhost:8000 no Chrome ou Edge e permita a câmera quando solicitado.\n
+
+VERSÃO 1.4
+- Corrigido o endereço do arquivo do leitor ZXing (zxing-browser.min.js).
+- Tenta dois servidores CDN diferentes.
+- Se os dois falharem, mantém a prévia da câmera aberta e mostra orientação, sem fechá-la abruptamente.

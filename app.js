@@ -119,29 +119,40 @@
   async function startZXingFallback(){
     try{
       if(!window.ZXingBrowser){
-        await new Promise((resolve,reject)=>{
-          const script=document.createElement("script");
-          script.src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js";
-          script.onload=resolve;script.onerror=()=>reject(new Error("Não foi possível carregar o leitor alternativo. Confira a conexão com a internet."));
-          document.head.appendChild(script);
-        });
+        const urls=[
+          "https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js",
+          "https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js"
+        ];
+        let loaded=false;
+        for(const url of urls){
+          try{
+            await new Promise((resolve,reject)=>{
+              const script=document.createElement("script");
+              script.src=url;script.onload=resolve;script.onerror=()=>{script.remove();reject(new Error("Falha ao carregar leitor"));};
+              document.head.appendChild(script);
+            });
+            if(window.ZXingBrowser){loaded=true;break;}
+          }catch{}
+        }
+        if(!loaded)throw new Error("Não foi possível baixar o leitor alternativo pelos servidores disponíveis.");
       }
       const Reader=window.ZXingBrowser?.BrowserMultiFormatReader;
-      if(!Reader)throw new Error("Leitor alternativo indisponível.");
+      if(!Reader)throw new Error("O leitor alternativo foi baixado, mas não iniciou corretamente.");
       const reader=new Reader();
-      $("scanStatus").textContent="Leitor alternativo ativo. Aponte a câmera para o código de barras.";
+      window.__macrofoodZXingReader=reader;
+      $("scanStatus").textContent="Leitor ativo. Aponte a câmera para o código de barras.";
       reader.decodeFromVideoElementContinuously($("video"),(result)=>{
         if(result?.getText){
           const code=result.getText();
-          stopScan();
           try{reader.reset();}catch{}
-          $("lookupInput").value=code;lookup(code);
+          window.__macrofoodZXingReader=null;
+          stopScan();$("lookupInput").value=code;lookup(code);
         }
       });
-      window.__macrofoodZXingReader=reader;
     }catch(err){
-      stopScan();$("scanButton").disabled=false;
-      $("scanStatus").textContent=(err.message||"Não foi possível iniciar a leitura.")+" Você ainda pode digitar o código no campo de busca.";
+      // Keep the camera preview open instead of abruptly closing it when the CDN is unavailable.
+      $("scanStatus").textContent=(err.message||"Não foi possível iniciar a leitura automática.")+" A câmera continua aberta. Tente novamente com internet liberada para unpkg.com/jsdelivr.net ou digite o código no campo de busca. ";
+      $("scanButton").hidden=false;$("scanButton").disabled=false;
     }
   }
   function stopScan(){if(scanTimer)clearInterval(scanTimer);scanTimer=null;try{window.__macrofoodZXingReader?.reset();}catch{}window.__macrofoodZXingReader=null;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$("video").srcObject=null;$("video").hidden=true;$("stopScan").hidden=true;$("scanButton").hidden=false;$("scanButton").disabled=false;}
