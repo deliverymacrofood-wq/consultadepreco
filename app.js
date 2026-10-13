@@ -87,17 +87,64 @@
   $("csvImport").onclick=async()=>{const f=$("csvFile").files[0];if(!f){setMessage("backupMessage","Selecione um arquivo CSV primeiro.",true);return;}try{const text=await f.text();const rows=parseCSV(text);if(rows.length<2)throw new Error("CSV vazio ou sem linhas de produtos.");const headers=rows[0].map(x=>normalize(x).replace(/[\s-]+/g,"_"));const pick=(row,keys)=>{const i=headers.findIndex(h=>keys.includes(h));return i<0?"":row[i]||"";};const incoming=rows.slice(1).filter(r=>r.some(x=>x.trim())).map(r=>normalizeImported({code:pick(r,["codigo","código","code"]),name:pick(r,["nome","name","produto"]),brand:pick(r,["marca","brand"]),barcode:pick(r,["codigo_barras","codigodebarras","barcode","ean","gtin"]),brand:pick(r,["marca","brand"]),retail:pick(r,["varejo","valor_varejo","retail","preco_varejo","preco"]),wholesale:pick(r,["atacado","valor_atacado","wholesale","preco_atacado"])}));let count=0;for(const p of incoming){const i=products.findIndex(x=>x.code===p.code||(p.barcode&&x.barcode===p.barcode));if(i>=0)products[i]={...p,id:products[i].id};else products.push(p);count++;}save();setMessage("backupMessage",`${count} produto(s) importado(s) do CSV.`);toast("CSV importado.");}catch(err){setMessage("backupMessage",err.message||"Falha ao importar CSV.",true);}};
   function parseCSV(text){const rows=[];let row=[],cell="",quoted=false;for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'&&quoted&&text[i+1]==='"'){cell+='"';i++;}else if(c==='"'){quoted=!quoted;}else if(c===","&&!quoted){row.push(cell.trim());cell="";}else if((c==="\n"||c==="\r")&&!quoted){if(c==="\r"&&text[i+1]==="\n")i++;row.push(cell.trim());if(row.some(x=>x))rows.push(row);row=[];cell="";}else cell+=c;}row.push(cell.trim());if(row.some(x=>x))rows.push(row);return rows;}
   async function startScan(){
-    if(!navigator.mediaDevices?.getUserMedia){$("scanStatus").textContent="Este navegador não disponibiliza câmera. Use a busca manual ou abra o app por HTTPS/localhost em um navegador compatível.";return;}
+    if(!window.isSecureContext || !navigator.mediaDevices?.getUserMedia){
+      $("scanStatus").textContent="Para usar a câmera, abra este aplicativo por HTTPS ou em http://localhost. Abrir o arquivo index.html diretamente pode bloquear a câmera.";
+      return;
+    }
+    $("scanButton").disabled=true;
+    $("scanStatus").textContent="Preparando leitor de código de barras…";
     try{
-      if(!("BarcodeDetector" in window)){ $("scanStatus").textContent="A leitura automática não está disponível neste navegador. Tente Chrome ou Edge atualizado; você também pode digitar o código manualmente."; return; }
-      const formats=await BarcodeDetector.getSupportedFormats();const preferred=["ean_13","ean_8","upc_a","upc_e","code_128","itf","code_39","qr_code"].filter(x=>formats.includes(x));
-      detector=new BarcodeDetector({formats:preferred});
       stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
-      $("video").srcObject=stream;$("video").hidden=false;$("stopScan").hidden=false;$("scanButton").hidden=true;await $("video").play();$("scanStatus").textContent="Aponte a câmera para o código de barras e mantenha-o dentro da imagem.";
-      scanTimer=setInterval(async()=>{try{if(!$("video").videoWidth)return;const codes=await detector.detect($("video"));if(codes.length&&codes[0].rawValue){const code=codes[0].rawValue;$("lookupInput").value=code;stopScan();lookup(code);}}catch{}},250);
-    }catch(err){stopScan();$("scanStatus").textContent=err.name==="NotAllowedError"?"Permita o acesso à câmera nas configurações do navegador.":"Não foi possível abrir a câmera. Verifique as permissões e tente novamente."; }
+      $("video").srcObject=stream;$("video").hidden=false;$("stopScan").hidden=false;$("scanButton").hidden=true;
+      await $("video").play();
+      if("BarcodeDetector" in window){
+        try{
+          const formats=await BarcodeDetector.getSupportedFormats();
+          const preferred=["ean_13","ean_8","upc_a","upc_e","code_128","itf","code_39"].filter(x=>formats.includes(x));
+          if(preferred.length) detector=new BarcodeDetector({formats:preferred});
+        }catch{detector=null;}
+      }
+      if(detector){
+        $("scanStatus").textContent="Aponte a câmera para o código de barras e mantenha-o dentro da imagem.";
+        scanTimer=setInterval(async()=>{try{if(!$("video").videoWidth)return;const codes=await detector.detect($("video"));if(codes.length&&codes[0].rawValue){const code=codes[0].rawValue;stopScan();$("lookupInput").value=code;lookup(code);}}catch{}},250);
+      } else {
+        await startZXingFallback();
+      }
+    }catch(err){
+      stopScan();
+      $("scanButton").disabled=false;
+      $("scanStatus").textContent=err.name==="NotAllowedError"?"A câmera foi bloqueada. Clique no cadeado ao lado do endereço, permita a câmera e tente novamente.":(err.name==="NotFoundError"?"Nenhuma câmera foi encontrada neste dispositivo.":"Não foi possível abrir a câmera. Confira a permissão do navegador e tente novamente.");
+    }
   }
-  function stopScan(){if(scanTimer)clearInterval(scanTimer);scanTimer=null;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$("video").srcObject=null;$("video").hidden=true;$("stopScan").hidden=true;$("scanButton").hidden=false;}
+  async function startZXingFallback(){
+    try{
+      if(!window.ZXingBrowser){
+        await new Promise((resolve,reject)=>{
+          const script=document.createElement("script");
+          script.src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js";
+          script.onload=resolve;script.onerror=()=>reject(new Error("Não foi possível carregar o leitor alternativo. Confira a conexão com a internet."));
+          document.head.appendChild(script);
+        });
+      }
+      const Reader=window.ZXingBrowser?.BrowserMultiFormatReader;
+      if(!Reader)throw new Error("Leitor alternativo indisponível.");
+      const reader=new Reader();
+      $("scanStatus").textContent="Leitor alternativo ativo. Aponte a câmera para o código de barras.";
+      reader.decodeFromVideoElementContinuously($("video"),(result)=>{
+        if(result?.getText){
+          const code=result.getText();
+          stopScan();
+          try{reader.reset();}catch{}
+          $("lookupInput").value=code;lookup(code);
+        }
+      });
+      window.__macrofoodZXingReader=reader;
+    }catch(err){
+      stopScan();$("scanButton").disabled=false;
+      $("scanStatus").textContent=(err.message||"Não foi possível iniciar a leitura.")+" Você ainda pode digitar o código no campo de busca.";
+    }
+  }
+  function stopScan(){if(scanTimer)clearInterval(scanTimer);scanTimer=null;try{window.__macrofoodZXingReader?.reset();}catch{}window.__macrofoodZXingReader=null;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$("video").srcObject=null;$("video").hidden=true;$("stopScan").hidden=true;$("scanButton").hidden=false;$("scanButton").disabled=false;}
   $("scanButton").onclick=startScan;$("stopScan").onclick=stopScan;
   renderProducts();
   if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost"))navigator.serviceWorker.register("./sw.js").catch(()=>{});

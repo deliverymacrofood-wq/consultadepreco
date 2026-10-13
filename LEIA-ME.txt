@@ -1,5 +1,5 @@
 MACROFOOD — CADASTRO E CONSULTA DE PREÇOS
-Versão 1.1 — catálogo AutoChat importado
+Versão 1.3 — correção de leitura pela câmera
 
 O QUE JÁ FUNCIONA
 - Catálogo inicial importado do arquivo AutoChat_8.0.29/data/products.json: 508 produtos com código, nome, marca, preço de venda e preço de atacado quando preenchido.
@@ -9,7 +9,7 @@ O QUE JÁ FUNCIONA
 - Um produto do arquivo original não tinha código interno; ele foi preservado com o código vazio para você preencher ao editar.
 - Cadastro de código interno de 1 a 6 dígitos, código de barras, nome, varejo e atacado opcional.
 - Busca por código interno, código de barras ou nome.
-- Leitura de código de barras pela câmera em navegadores compatíveis.
+- Leitura de código de barras pela câmera com leitor nativo e alternativa ZXing para navegadores sem BarcodeDetector (a alternativa precisa de internet para carregar).
 - Edição e exclusão de produtos.
 - Exportação/importação de backup JSON.
 - Importação de CSV.
@@ -48,3 +48,4 @@ LIMITAÇÕES CONHECIDAS
 
 CATÁLOGO IMPORTADO
 O catálogo incluído foi extraído do PDF TODOS OS PRODUTOS(1).pdf: 487 produtos, com código reduzido, código de barras, nome, marca estimada a partir do nome e P.Venda. Nas páginas 24 a 49, P.Venda foi dividido por Qt. Unit., conforme a regra solicitada anteriormente. O PDF não apresenta um campo explícito de preço de atacado; P.Tabela coincide com P.Venda nos registros analisados, então o atacado fica vazio quando não há um valor diferente. Confirme os valores de atacado na fonte original se precisar preencher esses preços.
+\n\nCORREÇÃO DA CÂMERA (v1.3)\n- O leitor agora usa uma alternativa quando o navegador não possui BarcodeDetector.\n- A câmera ainda exige HTTPS ou http://localhost; abrir index.html diretamente pode ser bloqueado por segurança.\n- No Windows, extraia o ZIP, abra o Prompt de Comando dentro da pasta MacroFood_Consulta_Precos e execute: python -m http.server 8000\n- Depois abra http://localhost:8000 no Chrome ou Edge e permita a câmera quando solicitado.\n
